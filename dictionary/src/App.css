@@ -1,0 +1,54 @@
+.themeRange {
+  -webkit-appearance: none;
+  height: 15px;
+  border-radius: 50px;
+  padding: 10.5px 3px;
+  transition: 0.4s all ease-out;
+}
+
+.themeRange::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.4s all ease-out;
+}
+
+.rangeThumb::-webkit-slider-thumb {
+  background: #fff;
+}
+
+input::placeholder {
+  font-weight: 400;
+}
+
+.tlis li {
+  font-size: 15px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-weight: 400;
+}
+
+.tlis li::before {
+  content: "\2022";
+  color: rgb(164, 69, 237);
+  font-weight: bold;
+  width: 1em;
+}
+#ftlnk{
+  font-size: 14px;
+}
+#menu{
+  top: calc(100% + 20px);
+  z-index: 4000;
+}
+.show{
+  display: none !important;
+}
+@media screen and (max-width: 320px) {
+  #ftlnk {
+    font-size: 12px;
+  }
+}
