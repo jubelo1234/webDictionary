@@ -14,7 +14,8 @@ export default {
         'grey': '#a3a3a3',
         'lightText': '#050505',
         'input': '#dddddd',
-        'input2': "#2d2d2d"
+        'input2': "#2d2d2d",
+        'ring' : '#0000001A'
       },
       fontFamily: {
         sanse: ["Inter", "sans-serif"],

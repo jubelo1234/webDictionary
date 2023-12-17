@@ -1,5 +1,5 @@
 import "../App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../images/logo.svg";
 import arrow from "../images/icon-arrow-down.svg";
 import moon from "../images/icon-moon.svg";
@@ -7,18 +7,21 @@ import sun from "../images/icon-sun.svg";
 import magIcon from "../images/icon-search.svg";
 import play from "../images/icon-play.svg";
 import elink from "../images/icon-new-window.svg";
+import axios from "axios";
 
 function App() {
-  const [range, setRange] = useState("1");
+  const [trange, setRange] = useState(true);
   const [font, setFont] = useState("font-sanse");
   const [menus, setMenu] = useState(false);
 
+  const range = trange ? "1" : "2";
+
   const themeImg = range === "1" ? moon : sun;
 
-  function handleChange(e) {
+  function handleChange() {
     const rootElement = document.documentElement;
     rootElement.classList.toggle("dark");
-    setRange(e.target.value);
+    setRange(!trange);
   }
 
   function fontChange(e) {
@@ -28,24 +31,62 @@ function App() {
   function menuChange() {
     setMenu(!menus);
   }
+  const [words, setWords] = useState("");
+  const [word, setWord] = useState("");
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${words}`;
+
+      try {
+        const response = await axios(apiUrl);
+        setData(response.data);
+        console.log(response.data);
+        console.log(response.data[0].meanings[0].definitions[0].definition);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    }
+
+    if (words !== "") {
+      fetchData();
+      // setWords('');
+    }
+  }, [words]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setWords(word);
+  };
+
+  function onSchnage(e) {
+    setWord(e.target.value);
+  }
 
   return (
     <>
       <div
-        className={`pt-10 pb-4 px-[5vw] ${font} min-h-screen bg-white dark:bg-black dark:text-white`}
+        className={`pt-10 pb-1 px-[5vw] ${font} min-h-screen bg-white dark:bg-black dark:text-white`}
       >
         <div className="max-w-[920px] mx-auto flex justify-between items-center flex-wrap">
-          <img src={logo} alt="logo" className="" />
+          <img src={logo} alt="logo" id="logo" className="" />
           <div className="flex items-center gap-[26px]">
             <div className="flex items-center gap-3 relative ">
-              <p className="text-[18px] font-bold min-w-[35px]" onClick={menuChange}>
-                {font === "font-sanse"
-                  ? "San-serif"
-                  : font === "font-serife"
-                  ? "Serif"
-                  : "Mono"}
-              </p>
-              <img src={arrow} alt="arrow_down" onClick={menuChange} />
+              <button
+                id="cbut"
+                onClick={menuChange}
+                className="border-none bg-none m-0 p-0 flex items-center justify-end w-[110px] gap-3 "
+              >
+                <p className="text-[18px] font-bold min-w-[35px]">
+                  {font === "font-sanse"
+                    ? "San-serif"
+                    : font === "font-serife"
+                    ? "Serif"
+                    : "Mono"}
+                </p>
+                <img src={arrow} alt="arrow_down" />
+              </button>
               <div
                 id="menu"
                 className={`bg-white absolute w-[140px] ${
@@ -77,65 +118,81 @@ function App() {
             </div>
             <hr className="h-[25px] w-[2px] bg-grey border-none dark:bg-white" />
             <div className="flex items-center gap-[19px] sint">
-              <input
-                type="range"
-                id="slider"
-                name="slider"
-                min="1"
-                max="2"
-                step="1"
-                value={range}
-                onChange={handleChange}
-                className="w-[40px] themeRange rangeThumb bg-grey dark:bg-darkPur"
-              />
+              <div
+                onClick={handleChange}
+                className={`flex 
+                } w-[40px] h-[20px] bg-grey dark:bg-darkPur rounded-[50px] transition-all duration-300`}
+              >
+                <span
+                  className={`h-full w-[20px] ${
+                    !trange ? "ml-[20px]" : ""
+                  } bg-gray-800 dark:bg-white rounded-[50%] transition-all duration-300 shadow-lg`}
+                />
+              </div>
               <img src={themeImg} alt="theme_logo" className="w-[25px]" />
             </div>
           </div>
         </div>
         <div className="mt-[35px] max-w-[920px] mx-auto ">
-          <Search />
+          <Search word={word} submit={handleSubmit} ichange={onSchnage} />
         </div>
-        <div className="flex justify-between items-center mt-[20px] md:mt-[30px] lg:mt-[35px] max-w-[920px] mx-auto mb-[30px]">
-          <div>
-            <MainWord />
-            <Trans />
-            <Trans />
-          </div>
-          <Audio />
-        </div>
-        <div className="max-w-[920px] mx-auto mb-[28px]">
-          <Noun />
-          <Verb />
-        </div>
-        <hr className="w-full max-w-[920px] mx-auto h-[1px] bg-input border-none" />
-        <div className="flex mt-[20px] flex-wrap mb-[70px] items-start max-w-[920px] mx-auto">
-          <h4 className="whitespace-nowrap text-[14px] text-grey font-[400] mr-[20px]">
-            Source :
-          </h4>
-          <div className="flex items-center">
-            <a
-              id="ftlnk"
-              className="text-[14px] font-bold  mr-[5px] text-grey "
-              href="https://en.wiktionary.org/wiki/keyboard"
-            >
-              https://en.wiktionary.org/wiki/keyboard
-            </a>
-            <img src={elink} alt="link" className="w-[17px]" />
-          </div>
+        <div className="max-w-[920px] mx-auto">
+          {data ? <Body data={data} /> : null}
         </div>
       </div>
     </>
   );
 }
 
-function Search() {
+function Body({ data }) {
+  return (
+    <>
+      <div className="flex justify-between items-center mt-[20px] md:mt-[30px] lg:mt-[35px]  mb-[30px]">
+        <div>
+          <MainWord word={data[0].word} />
+          <Trans text={data[0].phonetic} />
+        </div>
+        <Audio />
+      </div>
+      <div className=" mb-[28px]">
+        {data[0].meanings.map((item, index) => (
+          <Noun
+            key={index}
+            definitionst={item.definitions}
+            psp={item.partOfSpeech}
+            syn={item.synonyms ? item.synonyms : undefined}
+          />
+        ))}
+      </div>
+      <hr className="w-full  h-[1px] bg-input border-none" />
+      <div className="flex mt-[20px] flex-wrap mb-[70px] items-start ">
+        <h4 className="whitespace-nowrap text-[14px] text-grey font-[400] mr-[20px]">
+          Source :
+        </h4>
+        <div className="flex items-center">
+          <a
+            id="ftlnk"
+            className="text-[14px] font-bold  mr-[5px] text-grey "
+            href = {`${data[0].sourceUrls}`}
+          >
+            {`wikipedia/${data[0].word}`}
+          </a>
+          <img src={elink} alt="link" className="w-[17px]" />
+        </div>
+      </div>
+    </>
+  );
+}
+function Search({ word, submit, ichange }) {
   return (
     <div>
-      <form className="w-full relative">
+      <form className="w-full relative" onSubmit={submit}>
         <input
           id="search"
           autoComplete="off"
           type="text"
+          value={word}
+          onChange={ichange}
           placeholder="Search for any word.."
           className="w-full h-[60px] rounded-[20px] outline-none text-[20px] pl-[20px] pb-[5px] pr-[55px] font-medium text-black dark:text-white bg-input dark:bg-input2"
         />
@@ -151,21 +208,21 @@ function Search() {
   );
 }
 
-function MainWord() {
+function MainWord({ word }) {
   return (
     <div className="mb-[10px]">
-      <h1 className="text-left block font-bold text-black dark:text-white text-[32px] md:text-[45px] lg:text-[60px]">
-        Keyboard
+      <h1 className="text-left block font-bold mainWord text-black dark:text-white whitespace-normal capitalize text-[32px] md:text-[45px] lg:text-[60px]">
+        {word}
       </h1>
     </div>
   );
 }
 
-function Trans() {
-  const text = "/ˈkiːbɔːd/";
+function Trans({ text }) {
+  const texts = text;
   return (
     <div className="text-left">
-      <p className="text-darkPur text-[18px] md:text-[19px]">{text}</p>
+      <p className="text-darkPur text-[18px] md:text-[19px]">{texts}</p>
     </div>
   );
 }
@@ -180,12 +237,13 @@ function Audio() {
   );
 }
 
-function Noun() {
+function Noun({ definitionst, psp, syn }) {
+  const edDef = definitionst.slice(0, 6);
   return (
-    <div>
-      <div className="flex w-full flex-row justify-between items-center mb-[34px]">
+    <div className="mb-[48px]">
+      <div className="flex w-full flex-row justify-between items-center mb-[28px]">
         <h4 className="text-black lowercase italic mr-[20px] dark:text-white text-[20px] font-bold">
-          Noun
+          {psp}
         </h4>
         <div className="w-full h-[1px] bg-input"></div>
       </div>
@@ -194,55 +252,54 @@ function Noun() {
           Meaning
         </h3>
         <ul className="ml-[2rem] list-none tlis">
-          <li>
-            (etc.) A set of keys used to operate a typewriter, computer etc.
-          </li>
-          <li>
-            A component of many instruments including the piano, organ, and
-            harpsichord consisting of usually black and white keys that cause
-            different tones to be produced when struck.
-          </li>
-          <li>
-            A device with keys of a musical keyboard, used to control electronic
-            sound-producing devices which may be built into or separate from the
-            keyboard device.
-          </li>
+          {edDef.map((item, index) => (
+            <Point
+              key={index}
+              definitions={item.definition}
+              exam={item.example ? item.example : undefined}
+            />
+          ))}
         </ul>
       </div>
+      <Synonym words={syn} />
+    </div>
+  );
+}
+
+function Point({ definitions, exam }) {
+  return (
+    <li>
+      <div className="flex flex-col gap-[10px]">
+        <p className="">{definitions}</p>
+        {exam ? (
+          <span className="text-[15px] text-grey font-medium">{exam}</span>
+        ) : null}
+      </div>
+    </li>
+  );
+}
+
+function Synonym({ words }) {
+  console.log(words);
+  if (!words.length) {
+    return null;
+  }
+  const preWord = words.slice(0, 10);
+  const word = preWord.join(", ");
+  // const fullWords = words.join(' ');
+  return (
+    <>
       <div className="flex gap-x-[20px] gap-y-[5px] mt-[40px] mb-[43px]">
         <h1 className="text-[17px] whitespace-nowrap  text-grey mb-[0px] font-[400] text-left">
           Synonyms :
         </h1>
         <div className="flex gap-x-[10px] gap-y-[0px] flex-wrap">
-          <h4 className="text-darkPur font-bold">electronic keyboard</h4>
+          <h4 className="text-darkPur font-bold whitespace-normal wspc">
+            {word}
+          </h4>
         </div>
       </div>
-    </div>
-  );
-}
-function Verb() {
-  return (
-    <div>
-      <div className="flex w-full flex-row justify-between items-center mb-[34px]">
-        <h4 className="text-black lowercase italic mr-[20px] dark:text-white text-[20px] font-bold">
-          verb
-        </h4>
-        <div className="w-full h-[1px] bg-input"></div>
-      </div>
-      <div>
-        <h3 className="text-[17px] text-grey mb-[20px] font-[400] text-left">
-          Meaning
-        </h3>
-        <ul className="ml-[2rem] list-none tlis">
-          <li>
-            <p className="pb-[10px]">
-              To type on a computer keyboard.<br/>
-              <span className="text-[15px] text-grey font-medium mt-[10px]">{`"Keyboarding is the part of this job I hate the most."`}</span>
-            </p>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </>
   );
 }
 

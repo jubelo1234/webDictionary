@@ -1,23 +1,4 @@
-.themeRange {
-  -webkit-appearance: none;
-  height: 15px;
-  border-radius: 50px;
-  padding: 10.5px 3px;
-  transition: 0.4s all ease-out;
-}
 
-.themeRange::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 15px;
-  width: 15px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: 0.4s all ease-out;
-}
-
-.rangeThumb::-webkit-slider-thumb {
-  background: #fff;
-}
 
 input::placeholder {
   font-weight: 400;
@@ -26,7 +7,7 @@ input::placeholder {
 .tlis li {
   font-size: 15px;
   display: flex;
-  gap: 10px;
+  gap: 20px;
   margin-bottom: 14px;
   font-weight: 400;
 }
@@ -35,7 +16,6 @@ input::placeholder {
   content: "\2022";
   color: rgb(164, 69, 237);
   font-weight: bold;
-  width: 1em;
 }
 #ftlnk{
   font-size: 14px;
@@ -44,6 +24,13 @@ input::placeholder {
   top: calc(100% + 20px);
   z-index: 4000;
 }
+@media screen and (max-width:314px) {
+  #logo{
+    margin: 0 auto 20px;
+  }
+  /* #cbut{
+  } */
+}
 .show{
   display: none !important;
 }
@@ -51,4 +38,12 @@ input::placeholder {
   #ftlnk {
     font-size: 12px;
   }
+}
+
+.wspc{
+  word-spacing: 3px;
+}
+
+.mainWord{
+  word-wrap: break-word;
 }
