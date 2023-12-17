@@ -147,8 +147,8 @@ function App() {
 function Body({ data }) {
   return (
     <>
-      <div className="flex justify-between items-center mt-[20px] md:mt-[30px] lg:mt-[35px]  mb-[30px]">
-        <div>
+      <div className="flex justify-between items-center mt-[30px] md:mt-[30px] lg:mt-[35px]  mb-[30px]">
+        <div className="max-w-[70vw] lg:max-w-[700px]">
           <MainWord word={data[0].word} />
           <Trans text={data[0].phonetic} />
         </div>
@@ -173,7 +173,7 @@ function Body({ data }) {
           <a
             id="ftlnk"
             className="text-[14px] font-bold  mr-[5px] text-grey "
-            href = {`${data[0].sourceUrls}`}
+            href={`${data[0].sourceUrls}`}
           >
             {`wikipedia/${data[0].word}`}
           </a>
@@ -209,9 +209,17 @@ function Search({ word, submit, ichange }) {
 }
 
 function MainWord({ word }) {
+  let fsize = "";
+  if (word.length > 15) {
+    fsize = "text-[28px] lg:text-[50px]";
+  } else {
+    fsize = "text-[30px] lg:text-[60px]";
+  }
   return (
-    <div className="mb-[10px]">
-      <h1 className="text-left block font-bold mainWord text-black dark:text-white whitespace-normal capitalize text-[32px] md:text-[45px] lg:text-[60px]">
+    <div className="mb-[10px] max-w-[70vw]">
+      <h1
+        className={`text-left block font-bold mainWord text-black dark:text-white whitespace-normal capitalize ${fsize} md:text-[45px]`}
+      >
         {word}
       </h1>
     </div>
@@ -220,9 +228,17 @@ function MainWord({ word }) {
 
 function Trans({ text }) {
   const texts = text;
+  let fsize = "text-[18px]";
+if (text){
+  if (text.length > 15) {
+    fsize = "text-[14px]";
+  } else {
+    fsize = "text-[18px]";
+  }
+}
   return (
     <div className="text-left">
-      <p className="text-darkPur text-[18px] md:text-[19px]">{texts}</p>
+      <p className={`text-darkPur ${fsize} md:text-[19px]`}>{texts}</p>
     </div>
   );
 }
