@@ -1,5 +1,5 @@
 import "../App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import logo from "../images/logo.svg";
 import arrow from "../images/icon-arrow-down.svg";
 import moon from "../images/icon-moon.svg";
@@ -7,7 +7,10 @@ import sun from "../images/icon-sun.svg";
 import magIcon from "../images/icon-search.svg";
 import play from "../images/icon-play.svg";
 import elink from "../images/icon-new-window.svg";
+import errorImg from "../images/error.svg";
+import mag from "../images/magni.png";
 import axios from "axios";
+import { GridLoader } from "react-spinners";
 
 function App() {
   const [trange, setRange] = useState(true);
@@ -35,17 +38,27 @@ function App() {
   const [word, setWord] = useState("");
   const [data, setData] = useState(null);
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [initialVisit, setInitialVisit] = useState(true);
+
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
+      setInitialVisit(false);
+      setError(null);
       const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${words}`;
 
       try {
         const response = await axios(apiUrl);
         setData(response.data);
         console.log(response.data);
-        console.log(response.data[0].meanings[0].definitions[0].definition);
       } catch (error) {
         console.error("Error fetching data:", error.message);
+        setError("An error occurred while fetching data.");
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -137,7 +150,40 @@ function App() {
           <Search word={word} submit={handleSubmit} ichange={onSchnage} />
         </div>
         <div className="max-w-[920px] mx-auto">
-          {data ? <Body data={data} /> : null}
+          {initialVisit ? (
+            <div className="flex flex-col items-center justify-center mt-[15vh]">
+              <img
+                className="w-[100px] sm:w-[120px]"
+                src={mag}
+                alt="error"
+              />
+              <h5 className="text-[16px] md:text-[20px] text-center italic mt-[23px] text-grey mb-[13px] capitalize font-medium">
+               Search for a word to get started
+              </h5>
+            </div>
+          ) : loading ? (
+            <div className="w-full flex items-center justify-center mt-[30vh]">
+              <GridLoader color="#A445ED" />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center mt-[15vh]">
+              <img
+                className="w-[80%] max-w-[330px]"
+                src={errorImg}
+                alt="error"
+              />
+              <h5 className="text-[21px] mt-[23px] mb-[13px] capitalize font-semibold">
+                No definitions found!
+              </h5>
+              <p className="text-center max-w-[500px] px-4">
+                We couldn't find definitions for the word. Please check your
+                spelling, internet connection, and try the search again or go to
+                the web instead.
+              </p>
+            </div>
+          ) : data ? (
+            <Body data={data} />
+          ) : null}
         </div>
       </div>
     </>
@@ -145,6 +191,14 @@ function App() {
 }
 
 function Body({ data }) {
+  const phoneticsArray = data[0].phonetics;
+  const foundPhonetic =
+    phoneticsArray && phoneticsArray.length > 0
+      ? phoneticsArray.find((item) => item.audio !== "" && item.audio !== " ")
+      : null;
+
+  const audioUrl = foundPhonetic ? foundPhonetic.audio : null;
+
   return (
     <>
       <div className="flex justify-between items-center mt-[30px] md:mt-[30px] lg:mt-[35px]  mb-[30px]">
@@ -152,7 +206,7 @@ function Body({ data }) {
           <MainWord word={data[0].word} />
           <Trans text={data[0].phonetic} />
         </div>
-        <Audio />
+        <Audio url={audioUrl} />
       </div>
       <div className=" mb-[28px]">
         {data[0].meanings.map((item, index) => (
@@ -229,13 +283,13 @@ function MainWord({ word }) {
 function Trans({ text }) {
   const texts = text;
   let fsize = "text-[18px]";
-if (text){
-  if (text.length > 15) {
-    fsize = "text-[14px]";
-  } else {
-    fsize = "text-[18px]";
+  if (text) {
+    if (text.length > 15) {
+      fsize = "text-[14px]";
+    } else {
+      fsize = "text-[18px]";
+    }
   }
-}
   return (
     <div className="text-left">
       <p className={`text-darkPur ${fsize} md:text-[19px]`}>{texts}</p>
@@ -243,12 +297,32 @@ if (text){
   );
 }
 
-function Audio() {
+function Audio({ url }) {
+  if (!url) {
+    return null;
+  }
+
+  const audioRef = useRef();
+
+  useEffect(() => {
+    audioRef.current.load();
+  }, [url]);
+
+  const playAudio = () => {
+    audioRef.current.play().catch((error) => {
+      console.error("Failed to play audio:", error);
+    });
+  };
+
   return (
     <div>
-      <button className="border-none bg-none p-0 m-0">
+      <button className="border-none bg-none p-0 m-0" onClick={playAudio}>
         <img src={play} alt="play_audio" className="w-[50px] sm:w-[64px]" />
       </button>
+      <audio ref={audioRef}>
+        <source src={url} type="audio/mpeg" />
+        Audio not supported.
+      </audio>
     </div>
   );
 }
@@ -296,7 +370,7 @@ function Point({ definitions, exam }) {
 }
 
 function Synonym({ words }) {
-  console.log(words);
+  // console.log(words);
   if (!words.length) {
     return null;
   }
