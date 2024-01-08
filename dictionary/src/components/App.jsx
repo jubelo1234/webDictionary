@@ -19,12 +19,41 @@ function App() {
 
   const range = trange ? "1" : "2";
 
-  const themeImg = range === "1" ? moon : sun;
+  const themeImg = range === "1" ? sun : moon;
+
+  const [themeLoaded, setThemeLoaded] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('selectedTheme');
+    if (savedTheme) {
+      applyTheme(savedTheme);
+      setRange(savedTheme === 'dark');
+    } else {
+      applyTheme('light');
+      setRange(false);
+      setThemeInLocalStorage('light');
+    }
+
+    setThemeLoaded(true);
+  }, []);
+
+  // Function to apply the selected theme
+  function applyTheme(theme) {
+    const rootElement = document.documentElement;
+    rootElement.classList.toggle("dark", theme === 'dark');
+  }
+
 
   function handleChange() {
-    const rootElement = document.documentElement;
-    rootElement.classList.toggle("dark");
+    const newTheme = trange ? 'light' : 'dark';
     setRange(!trange);
+    setThemeInLocalStorage(newTheme);
+    applyTheme(newTheme);
+  }
+
+  // Function to set the theme in localStorage
+  function setThemeInLocalStorage(theme) {
+    localStorage.setItem('selectedTheme', theme);
   }
 
   function fontChange(e) {
@@ -80,7 +109,7 @@ function App() {
   return (
     <>
       <div
-        className={`pt-10 pb-1 px-[5vw] ${font} min-h-screen bg-white dark:bg-black dark:text-white`}
+        className={`pt-10 pb-1 px-[5vw] ${themeLoaded ? "" : "hidden"} ${font} min-h-screen bg-white dark:bg-black dark:text-white`}
       >
         <div className="max-w-[920px] mx-auto flex justify-between items-center flex-wrap">
           <img src={logo} alt="logo" id="logo" className="" />
@@ -152,13 +181,9 @@ function App() {
         <div className="max-w-[920px] mx-auto">
           {initialVisit ? (
             <div className="flex flex-col items-center justify-center mt-[15vh]">
-              <img
-                className="w-[100px] sm:w-[120px]"
-                src={mag}
-                alt="error"
-              />
+              <img className="w-[100px] sm:w-[120px]" src={mag} alt="error" />
               <h5 className="text-[16px] md:text-[20px] text-center italic mt-[23px] text-grey mb-[13px] capitalize font-medium">
-               Search for a word to get started
+                Search for a word to get started
               </h5>
             </div>
           ) : loading ? (
