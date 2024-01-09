@@ -97,9 +97,12 @@ function App() {
     }
   }, [words]);
 
+  const inputRef = useRef(null);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setWords(word);
+    inputRef.current.blur();
   };
 
   function onSchnage(e) {
@@ -176,7 +179,7 @@ function App() {
           </div>
         </div>
         <div className="mt-[35px] max-w-[920px] mx-auto ">
-          <Search word={word} submit={handleSubmit} ichange={onSchnage} />
+          <Search word={word} submit={handleSubmit} ichange={onSchnage} inputRef={inputRef} />
         </div>
         <div className="max-w-[920px] mx-auto">
           {initialVisit ? (
@@ -262,12 +265,13 @@ function Body({ data }) {
     </>
   );
 }
-function Search({ word, submit, ichange }) {
+function Search({ word, submit, ichange, inputRef }) {
   return (
     <div>
       <form className="w-full relative" onSubmit={submit}>
         <input
           id="search"
+          ref={inputRef}
           autoComplete="off"
           type="text"
           value={word}
