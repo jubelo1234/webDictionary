@@ -1,5 +1,7 @@
 
 Web Dictionary App from Frontend Mentor
+
+
 Welcome to the Web Dictionary App, a feature-rich application designed to provide you with comprehensive word definitions, pronunciations, and the flexibility to choose between light and dark themes. This app also ensures a seamless experience by saving your preferred theme to the browser for future visits.
 
 Features
